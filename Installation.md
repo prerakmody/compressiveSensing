@@ -9,12 +9,12 @@
 ## Using Python3.5 via conda envs
 1. Open GitBash as a "normal" user
 2. Run these commands
-2.1 conda create --name py3.5 python=3.5 	(OR conda create --name py3.5 python=3.5 anaconda)
-2.2 source activate py3.5
-2.3 python --version  						(to check the version)
-2.4 conda info --envs  						(this may not work, only seems to work with Admin Git Bash)
-2.5 pip install jupyter
-2.6 pip install --upgrade tensorflow-gpu
+3. conda create --name py3.5 python=3.5 	(OR conda create --name py3.5 python=3.5 anaconda)
+4. source activate py3.5
+5. python --version  						(to check the version)
+6. conda info --envs  						(this may not work, only seems to work with Admin Git Bash)
+7. pip install jupyter
+8. pip install --upgrade tensorflow-gpu
 
 ## Using python3.5 after installation
 1. Open Git Bash as a normal user
@@ -26,14 +26,14 @@
 1. https://github.com/openai/gym
 2. pip install 'gym[all]'
 3. How to Install mujoco
-3.0 pip install mujoco-py
-3.1 URL : https://github.com/openai/mujoco-py/
-3.2 Install the Win64 version.
-3.3 Check if you have the env paths defined - echo $MUJOCO_PY_MJKEY_PATH  || echo $MUJOCO_PY_MJPRO_PATH
-3.4 How to import mujoco - import mujoco_py
-3.5 Test the simulate.exe file. It will be unable to export the mjkey.txt file. 
-3.6 Add platname = "win" to platname_targdir.py
-3.6 Use the .dll file in mjcore.py
+4. pip install mujoco-py
+5. URL : https://github.com/openai/mujoco-py/
+6. Install the Win64 version.
+7. Check if you have the env paths defined - echo $MUJOCO_PY_MJKEY_PATH  || echo $MUJOCO_PY_MJPRO_PATH
+8. How to import mujoco - import mujoco_py
+9. Test the simulate.exe file. It will be unable to export the mjkey.txt file. 
+10. Add platname = "win" to platname_targdir.py
+11. Use the .dll file in mjcore.py
 
 ## To run the Jupyer notebooks
 1.  Open command prompt
@@ -44,7 +44,6 @@ Widgets for Ipython
 0. https://github.com/ipython-contrib/jupyter_contrib_nbextensions
 1. pip install jupyter_contrib_nbextensions
 2. jupyter contrib nbextension install --user
-3. 
 
 
 ## Removing conda envs
