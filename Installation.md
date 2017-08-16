@@ -41,7 +41,7 @@
 2.  Navigate to your folder
 3.  Type `jupyter notebook` (do "source activate py3.5" if you wish for the python version to be different from system default)
 
-Widgets for Ipython
+## Widgets for Ipython
 0. https://github.com/ipython-contrib/jupyter_contrib_nbextensions
 1. pip install jupyter_contrib_nbextensions
 2. jupyter contrib nbextension install --user
@@ -56,3 +56,6 @@ Widgets for Ipython
 2. Simply uninstall (sometimes you have to try this twice as well), 
 3. Then reinstall (numoy/scipt) from the UCI website (http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy)
 4. You could also download cv2 from there
+
+## Other libraries
+1. pip install joblib
