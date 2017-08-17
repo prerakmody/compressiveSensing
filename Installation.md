@@ -15,7 +15,7 @@
 6. conda info --envs  						(this may not work, only seems to work with Admin Git Bash)
 7. pip install jupyter
 8. pip install --upgrade tensorflow-gpu
-9. pip install keras (this might fail and you may havve to install numpy/scipy. Check last point)
+9. pip install keras (this might fail and you may have to install numpy/scipy. Check last point)
 
 ## Using python3.5 after installation
 1. Open Git Bash as a normal user
