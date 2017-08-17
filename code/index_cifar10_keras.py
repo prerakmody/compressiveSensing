@@ -114,13 +114,13 @@ X_train /= 255
 model.fit(X_train, y_train, batch_size=64, epochs = 30, verbose=1, shuffle=True)
 
 
-# In[ ]:
+# In[27]:
 
 
 model.evaluate(X_validate, y_validate, verbose=1)
 
 
-# In[ ]:
+# In[28]:
 
 
 model.metrics_names
