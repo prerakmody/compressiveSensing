@@ -1,3 +1,9 @@
 *data/
+*additional_packages/
+
 *.gz
 *.ipynb_checkpoints/
+*.jpeg
+*.JPEG
+*.jpg
+*.JPG
