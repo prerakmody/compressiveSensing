@@ -1,8 +1,10 @@
 ## Running Deeplearning libs on a Windows laptop
 1. Install Cuda.
 2. Install CUdnn (you'll have to register on the developer.nvidia.com website for this purpose)
+    i. Use this [link](https://developer.nvidia.com/rdp/cudnn-download)
 2. Check if your graphics driver is compatible with CUDA (use this link: https://sourceforge.net/projects/cuda-z/files/cuda-z/0.10/CUDA-Z-0.10.251-64bit.exe/download)
 3. Run `nvcc --version` in the command line to check if everything was installed properly
+        i. For Ubuntu - sudo apt-get install nvidia-cuda-toolkit
 4. To check the installation path `which nvcc`
 
 
@@ -25,8 +27,9 @@
 2. Simply uninstall exiting numpy / scipy installation (sometimes you have to try this twice) 
 3. Then reinstall (numpy/scipy) from the UCI website (http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy)
 4. You could also download cv2 from there
+    i. For ubuntu following this [link](http://www.pyimagesearch.com/2015/07/20/install-opencv-3-0-and-python-3-4-on-ubuntu/)
 
-## LIBRARIES FOR DEPP LEARNING
+## LIBRARIES FOR DEEP LEARNING
 1. pip install --upgrade tensorflow-gpu
 2. pip install keras
 3. pip install jupyter

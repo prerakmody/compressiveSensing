@@ -1,5 +1,5 @@
 *data/
-*additional_packages/
+*/additional_packages/*
 
 *.gz
 *.ipynb_checkpoints/
