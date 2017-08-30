@@ -1,10 +1,13 @@
 ## Running Deeplearning libs on a Windows laptop
 1. Install Cuda.
+    * Refer to this [documentation](http://docs.nvidia.com/cuda/cuda-installation-guide-linux/#axzz4VZnqTJ2A)
 2. Install CUdnn (you'll have to register on the developer.nvidia.com website for this purpose)
     * Use this [link](https://developer.nvidia.com/rdp/cudnn-download)
 2. Check if your graphics driver is compatible with CUDA (use this [link](https://sourceforge.net/projects/cuda-z/files/cuda-z/0.10/CUDA-Z-0.10.251-64bit.exe/download)
 3. Run `nvcc --version` in the command line to check if everything was installed properly
-    * For Ubuntu - sudo apt-get install nvidia-cuda-toolkit
+    * For Ubuntu
+    ** `sudo apt-get install nvidia-cuda-toolkit`
+    ** `dpkg -l | grep -i nvidia`
 4. To check the installation path `which nvcc`
 
 
