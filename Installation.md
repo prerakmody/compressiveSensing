@@ -52,23 +52,25 @@
     * Refer [here](https://www.tensorflow.org/install/install_linux) for Linux
 2. pip install theano
     * Ubuntu
-        * vim ~/.theanorc
-        * > [global]
-        * > device=gpu
-        * > floatX=float32
-        * 
-        * > [nvcc]
-        * > flags=-D_FORCE_INLINES
-
-2. pip install keras
+      * vim ~/.theanorc
+      * ```
+        [global]
+        device=gpu
+        floatX=float32
+        
+        [nvcc]
+        flags=-D_FORCE_INLINES
+        ```
+         
+3. pip install keras
     * Ubuntu
         * vim .keras/keras.json
             * > {"backend": "tensorflow","epsilon": 1e-07,"image_data_format": "channels_last","floatx": "float32"}
             * > {"backend": "tensorflow","epsilon": 1e-07,"image_data_format": "channels_last","floatx": "float32"}
         * While running a NN, run `nvidia-smi` to check processes using GPU
 
-3. pip install jupyter
-4. pip install h5py
+4. pip install jupyter
+5. pip install h5py
 
 
 ## Widgets for Ipython
