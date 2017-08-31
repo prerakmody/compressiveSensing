@@ -1,14 +1,29 @@
-## Running Deeplearning libs on a Windows laptop
+## Installing NVIDIA packages
 1. Install Cuda.
-    * Refer to this [documentation](http://docs.nvidia.com/cuda/cuda-installation-guide-linux/#axzz4VZnqTJ2A)
-2. Install CUdnn (you'll have to register on the developer.nvidia.com website for this purpose)
-    * Use this [link](https://developer.nvidia.com/rdp/cudnn-download)
-2. Check if your graphics driver is compatible with CUDA (use this [link](https://sourceforge.net/projects/cuda-z/files/cuda-z/0.10/CUDA-Z-0.10.251-64bit.exe/download)
+    * Linux
+        * Refer to this [documentation](http://docs.nvidia.com/cuda/cuda-installation-guide-linux/#axzz4VZnqTJ2A)
+        * Post Installation
+            * export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64
+            * export PATH=/usr/local/cuda-8.0/bin${PATH:+:${PATH}} 
+            * export CUDA_HOME=/usr/local/cuda-8.0
+            * export CUDA_ROOT=/usr/local/cuda-8.0
+        * NVIDIA Proprietary Driver Issues
+            * [symlink issues for libEGL.so](https://askubuntu.com/questions/900285/libegl-so-1-is-not-a-symbolic-link)
+2. Install CUdnn 
+    * Register on the [developer.nvidia.com](https://developer.nvidia.com/rdp/cudnn-download)
 3. Run `nvcc --version` in the command line to check if everything was installed properly
     * For Ubuntu
-    ** `sudo apt-get install nvidia-cuda-toolkit`
-    ** `dpkg -l | grep -i nvidia`
-4. To check the installation path `which nvcc`
+        * `sudo apt-get install nvidia-cuda-toolkit`
+        * `dpkg -l | grep -i nvidia`
+4. To check the installation path 
+    * `which nvcc`
+5. A GUI app for Nvidia Card Details
+    * [Link](https://sourceforge.net/projects/cuda-z/?source=typ_redirect)
+    * Ubuntu
+        * sudo apt-get install libxrender1:i386 libxtst6:i386 libxi6:i386
+        * apt-get install lib32stdc++6
+        * chmod + x CUDA-Z-0.10.251-32bit.run
+        * ./CUDA-Z-0.10.251-32bit.run
 
 
 ## Using Python3.5 via conda envs
@@ -35,9 +50,26 @@
 ## LIBRARIES FOR DEEP LEARNING
 1. pip install --upgrade tensorflow-gpu
     * Refer [here](https://www.tensorflow.org/install/install_linux) for Linux
+2. pip install theano
+    * Ubuntu
+        * vim ~/.theanorc
+        * > [global]
+        * > device=gpu
+        * > floatX=float32
+        * 
+        * > [nvcc]
+        * > flags=-D_FORCE_INLINES
+
 2. pip install keras
+    * Ubuntu
+        * vim .keras/keras.json
+            * > {"backend": "tensorflow","epsilon": 1e-07,"image_data_format": "channels_last","floatx": "float32"}
+            * > {"backend": "tensorflow","epsilon": 1e-07,"image_data_format": "channels_last","floatx": "float32"}
+        * While running a NN, run `nvidia-smi` to check processes using GPU
+
 3. pip install jupyter
 4. pip install h5py
+
 
 ## Widgets for Ipython
 0. https://github.com/ipython-contrib/jupyter_contrib_nbextensions
