@@ -12,17 +12,21 @@ print ('\nPython version:',sys.version)
 
 """
 FOR TENSORFLOW
-"""
+# """
 
-# with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
-# 	print ('\n---------TF session:',sess)
+from tensorflow.python.client import device_lib
+print(device_lib.list_local_devices())
 
-# 	a = tf.random_normal((100,100))
-# 	b = tf.random_normal((100,500))
-# 	c = tf.matmul(a,b)
-# 	sess.run(c)
-# 	print ('\n---------matmul:',c.eval())
-# 	sess.close()
+import tensorflow as tf
+with tf.device('/gpu:0'):
+  a = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[2, 3], name='a')
+  b = tf.constant([1.0, 2.0, 3.0, 4.0, 5.0, 6.0], shape=[3, 2], name='b')
+  c = tf.matmul(a, b)
+# Creates a session with log_device_placement set to True.
+sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+# Runs the op.
+print(sess.run(c))
+
 # """
 # 1. There are sessions and graphs in TensorFlow
 # 2. One session can have at a point of time, any graphs run under it.
@@ -56,4 +60,7 @@ FOR THEANO
 # else:
 #     print('Used the gpu')
 
-
+# import theano
+# from theano.sandbox.cuda.dnn import dnn_available as d; 
+# print(d() or d.msg)
+## Using gpu device 0: GeForce 940MX (CNMeM is enabled with initial size: 70.0% of memory, cuDNN None)

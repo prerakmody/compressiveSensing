@@ -1,19 +1,50 @@
 ## Installing NVIDIA packages
+0. Check your Nvidia Graphics Card
+    * Ubuntu
+        * Check if card is available
+            * Card : `lspci | grep -i nvidia`
+            * Driver : `cat /proc/driver/nvidia/version`
+            * A process list for your GPU : `nvidia-smi`
+        * If not available 
+            * sudo add-apt-repository ppa:graphics-drivers/ppa
+            * sudo apt-get update
+            * sudo ubuntu-drivers autoinstall
+            * sudo reboot
+            * nvidia-smi
 1. Install Cuda.
     * Linux
         * Refer to this [documentation](http://docs.nvidia.com/cuda/cuda-installation-guide-linux/#axzz4VZnqTJ2A)
+            * use the debian package for installation
         * Post Installation
-            * export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64
-            * export PATH=/usr/local/cuda-8.0/bin${PATH:+:${PATH}} 
-            * export CUDA_HOME=/usr/local/cuda-8.0
-            * export CUDA_ROOT=/usr/local/cuda-8.0
+            * ```
+               export CUDA_HOME=/usr/local/cuda-8.0
+               export CUDA_ROOT=/usr/local/cuda-8.0
+               export PATH=/usr/local/cuda-8.0/bin${PATH:+:${PATH}}
+               export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64
+               source .profile
+             ```
         * NVIDIA Proprietary Driver Issues
             * [symlink issues for libEGL.so](https://askubuntu.com/questions/900285/libegl-so-1-is-not-a-symbolic-link)
 2. Install CUdnn 
     * Register on the [developer.nvidia.com](https://developer.nvidia.com/rdp/cudnn-download)
+    * Download the cudnn files
+        * Copy them as follows:
+            * `sudo cp -P lib64/libcudnn* /usr/local/cuda-8.0/lib64/`
+            * `sudo cp -P include/cudnn.h /usr/local/cuda-8.0/include/`
+            * `sudo cp include/cudnn.h /usr/local/cuda/include`
+            * `sudo cp cuda/lib64/libcudnn* /usr/local/cuda/lib64`
+            * `sudo chmod a+r /usr/local/cuda/include/cudnn.h /usr/local/cuda/lib64/libcudnn*`
+    * You need to have the following files
+        * Check `find /usr | grep libcudnn`
+        * Check `find /usr | grep cudnn.h`
+        * cudnn.h (`/usr/local/cuda-8.0/include/cudnn.h`)
+        * libcudnn.so (`/usr/local/cuda-8.0/lib64/libcudnn.so`)
+        * libcudnn.so.6
+        * libcudnn.so.6.0.21
+        * libcudnn_static.a
 3. Run `nvcc --version` in the command line to check if everything was installed properly
     * For Ubuntu
-        * `sudo apt-get install nvidia-cuda-toolkit`
+        * `sudo apt-get install nvidia-cuda-toolkit` (this hould not be done)
         * `dpkg -l | grep -i nvidia`
 4. To check the installation path 
     * `which nvcc`
@@ -49,17 +80,34 @@
 
 ## LIBRARIES FOR DEEP LEARNING
 1. pip install --upgrade tensorflow-gpu
-    * Refer [here](https://www.tensorflow.org/install/install_linux) for Linux
-2. pip install theano
+    * Ubuntu
+        * Refer [here](https://www.tensorflow.org/install/install_linux)
+        * sudo apt-get install libcupti-dev
+
+2. conda install theano pygpu
     * Ubuntu
       * vim ~/.theanorc
       * ```
         [global]
         device=gpu
         floatX=float32
+        mode=FAST_RUN
+        optimizer_including=cudnn (doubtful)
         
         [nvcc]
         flags=-D_FORCE_INLINES
+
+        [dnn]
+        enabled = True
+        include_path=/usr/local/cuda-8.0/include
+        library_path=/usr/local/cuda-8.0/lib64
+        ```
+      * If any issues with device not found : `sudo service lightdm restart`
+      * To clear cache : `theano-cache purge`
+      * ```
+        sudo apt-get install gcc-4.9 g++-4.9
+        sudo ln -s /usr/bin/gcc-4.9 /usr/local/cuda-8.0/bin/gcc
+        sudo ln -s /usr/bin/g++-4.9 /usr/local/cuda-8.0/bin/g++
         ```
          
 3. pip install keras
