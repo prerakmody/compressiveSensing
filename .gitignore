@@ -8,3 +8,5 @@
 *.JPEG
 *.jpg
 *.JPG
+*.h5
+*.hdf5

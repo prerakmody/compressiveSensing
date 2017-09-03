@@ -5,24 +5,39 @@
             * Card : `lspci | grep -i nvidia`
             * Driver : `cat /proc/driver/nvidia/version`
             * A process list for your GPU : `nvidia-smi`
+            * Check VGA and 3D drivers : `lspci -k | grep -EA2 'VGA|3D'`
+                * To turn VGA to Intel GPU
+                    * `sudo nvidia-settings`
+                    * Go to PRIME Profiles
+                    * Select Intel GPU
+
+            * Experimental reset command : 
+                * `sudo su`
+                * `LD_PRELOAD=/usr/lib/nvidia-367/libnvidia-ml.so`
+                * `nvidia-smi --gpu-reset -i 0sudo nvidia-smi --gpu-reset -i 0`
         * If not available 
             * sudo add-apt-repository ppa:graphics-drivers/ppa
             * sudo apt-get update
             * sudo ubuntu-drivers autoinstall
             * sudo reboot
             * nvidia-smi
+                * You may have to add the following to the command line : `export LD_PRELOAD=/usr/lib/nvidia-375/libnvidia-ml.so`
 1. Install Cuda.
     * Linux
         * Refer to this [documentation](http://docs.nvidia.com/cuda/cuda-installation-guide-linux/#axzz4VZnqTJ2A)
             * use the debian package for installation
         * Post Installation
+            * Include these in ~/.profile
             * ```
                export CUDA_HOME=/usr/local/cuda-8.0
                export CUDA_ROOT=/usr/local/cuda-8.0
                export PATH=/usr/local/cuda-8.0/bin${PATH:+:${PATH}}
-               export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64
+               export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64:/usr/lib/nvidia-375
                source .profile
              ```
+            * To check if driver is detected by CUDA
+                * `cd /usr/local/cuda-8.0/extras/demo_suite/` 
+                * `./deviceQuery`
         * NVIDIA Proprietary Driver Issues
             * [symlink issues for libEGL.so](https://askubuntu.com/questions/900285/libegl-so-1-is-not-a-symbolic-link)
 2. Install CUdnn 
@@ -83,6 +98,9 @@
     * Ubuntu
         * Refer [here](https://www.tensorflow.org/install/install_linux)
         * sudo apt-get install libcupti-dev
+        * To control logging:
+            * `export TF_CPP_MIN_LOG_LEVEL=1` (very verbose)
+            * `export TF_CPP_MIN_LOG_LEVEL=2` (only error messages)
 
 2. conda install theano pygpu
     * Ubuntu
@@ -115,7 +133,8 @@
         * vim .keras/keras.json
             * > {"backend": "tensorflow","epsilon": 1e-07,"image_data_format": "channels_last","floatx": "float32"}
             * > {"backend": "tensorflow","epsilon": 1e-07,"image_data_format": "channels_last","floatx": "float32"}
-        * While running a NN, run `nvidia-smi` to check processes using GPU
+        * While running a NN, run the following command to check processes using GPU
+            * `watch -n 1 nvidia-smi`
 
 4. pip install jupyter
 5. pip install h5py
