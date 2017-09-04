@@ -14,11 +14,11 @@
             * Experimental reset command : 
                 * `sudo su`
                 * `LD_PRELOAD=/usr/lib/nvidia-367/libnvidia-ml.so`
-                * `nvidia-smi --gpu-reset -i 0sudo nvidia-smi --gpu-reset -i 0`
+                * `sudo nvidia-smi --gpu-reset -i 0`
         * If not available 
             * sudo add-apt-repository ppa:graphics-drivers/ppa
             * sudo apt-get update
-            * sudo ubuntu-drivers autoinstall
+            * sudo ubuntu-drivers autoinstall (this also helps if the login screen turns into a loop)
             * sudo reboot
             * nvidia-smi
                 * You may have to add the following to the command line : `export LD_PRELOAD=/usr/lib/nvidia-375/libnvidia-ml.so`
@@ -33,11 +33,12 @@
                export CUDA_ROOT=/usr/local/cuda-8.0
                export PATH=/usr/local/cuda-8.0/bin${PATH:+:${PATH}}
                export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64:/usr/lib/nvidia-375
-               source .profile
+               export LD_PRELOAD=/usr/lib/nvidia-375/libnvidia-ml.so
              ```
             * To check if driver is detected by CUDA
-                * `cd /usr/local/cuda-8.0/extras/demo_suite/` 
+                * `find /usr/local/cuda-8.0 -name deviceQuery`
                 * `./deviceQuery`
+                    * you might have to use the command `make` to get an executable    
         * NVIDIA Proprietary Driver Issues
             * [symlink issues for libEGL.so](https://askubuntu.com/questions/900285/libegl-so-1-is-not-a-symbolic-link)
 2. Install CUdnn 
@@ -148,6 +149,7 @@
 
 ## Other libraries
 1. pip install joblib
+2. pip install opencv-contrib-python
 
 ## To run the Jupyer notebooks
 1.  Open command prompt
