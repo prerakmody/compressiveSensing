@@ -68,7 +68,13 @@ def check_gpu(verbose = 1):
     import os
 
     if verbose:
-        print ('0. Envs  : CUDA_HOME', os.environ['CUDA_HOME'])
+        print ('\n0. Nvidia Hardware (lspci | grep -i nvidia) : ', [each for each in os.popen('lspci | grep -i nvidia')])
+        print ('0. Nvidia Driver (cat /proc/driver/nvidia/version) : ', [each for each in os.popen('cat /proc/driver/nvidia/version')][0])
+        print ('0. Nvidia Driver (ls /usr/lib | grep nvidia-) : ', [each for each in os.popen('ls /usr/lib | grep nvidia-')])
+        print ('0. Nvidia Driver : (dpkg --get-selections | grep nvidia) : ')
+        for each in os.popen('dpkg --get-selections | grep nvidia'):
+            print (each)
+        print ('\n0. Envs  : CUDA_HOME', os.environ['CUDA_HOME'])
         print ('0. Envs  : CUDA_ROOT',os.environ['CUDA_ROOT'])
         print ('0. Envs  : LD_LIBRARY_PATH:', os.environ['LD_LIBRARY_PATH'])
         print ('0. Envs  : PATH (containing cuda)', [each for each in os.environ['PATH'].split(':') if each.find('cuda') > -1])
