@@ -7,7 +7,10 @@
             * Driver Version: 
                 * `cat /proc/driver/nvidia/version`
                 * `ls /usr/lib | grep nvidia-`
-                    * The above two values should match   
+                * `dpkg --get-selections | grep nvidia`
+                    * The above three values should match
+                    * You should not have multiple Nvidia drivers installed
+                * 
             * A process list for your GPU : `nvidia-smi`
             * Check VGA and 3D drivers : `lspci -k | grep -EA2 'VGA|3D'`
                 * To turn VGA to Intel GPU
