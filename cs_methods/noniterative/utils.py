@@ -95,3 +95,24 @@ def check_gpu(verbose = 1):
     
     else:
         return 0
+
+""" 4. SAVING MODEL TO DISK """
+def model_disk(action, filename_model_arch, filename_model_weights, model=''):
+    from keras.models import model_from_json
+    
+    print ('\n3. --------------------------------------> Model on Disk')
+    if action == 'save':
+        with open(filename_model_arch, "w") as handle:
+            handle.write(model.to_json())
+        model.save_weights(filename_model_weights)
+        print("\nSaved model to disk")
+        
+    elif action == 'load':
+        json_file = open(filename_model_arch, 'r')
+        loaded_model_json = json_file.read()
+        json_file.close()
+        model = model_from_json(loaded_model_json)
+        model.load_weights(filename_model_weights)
+        print("Loaded model from disk")
+    
+    return model

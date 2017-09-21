@@ -29,6 +29,17 @@
             * sudo reboot
             * nvidia-smi
                 * You may have to add the following to the command line : `export LD_PRELOAD=/usr/lib/nvidia-375/libnvidia-ml.so`
+        * If the NVIDIA driver is not responding after a PC hibernate/sleep
+            * ```
+                sudo rmmod nvidia_uvm
+                sudo rmmod nvidia_drm
+                sudo rmmod nvidia_modeset
+                sudo rmmod nvidia
+                sudo modprobe nvidia
+                sudo modprobe nvidia_modeset
+                sudo modprobe nvidia_drm
+                sudo modprobe nvidia_uvm
+            ```
 1. **Install Cuda**
     * ***
     * Linux
