@@ -79,12 +79,14 @@ def images_problem(url_processed_folder):
 
     A_ = tf.constant(A,name='A')
     prob = TFGenerator(A=A,A_=A_)
-    prob.name = '2D_Images_'
+    prob.name = '2D_Images'
 
     prob.xval = X.T
     prob.yval = y.T
     prob.xinit = X.T
     prob.yinit = y.T
+    prob.xgen_ = tf.constant(X.T, dtype=tf.float32)
+    prob.ygen_ = tf.constant(y.T, dtype=tf.float32)
 
     return prob
 
