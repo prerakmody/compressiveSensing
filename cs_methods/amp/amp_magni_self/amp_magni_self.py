@@ -10,9 +10,10 @@ References
 
 """
 
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
-# %matplotlib notebook
+
 
 class AMP_Magni_Self():
 
@@ -422,17 +423,25 @@ class AMP_Magni_Self():
         """
 
         # AMP iterations
-        xhat = np.zeros((self.A.shape[1], 1), dtype = np.float32)
+        xhat = np.zeros((self.A.shape[1], 1)) #, dtype = np.float32)
         res = self.y - self.A.dot(xhat)
         AH_dot_res = self.AH.dot(res)
 
+
+        # Plotting Purposes
+        f, axx = plt.subplots(1, 1, squeeze=True)
+        axx.set_xlabel('Iteration')
+        axx.set_ylabel('MSE')
+        axx.set_xlim(0, self.iterations)
+        axx.set_ylim(0,1000)
         mse = []
         iters = []
 
-        abc = plt.subplots(1, 1, squeeze=False)
         for it in range(self.iterations):
             if it % 50 == 0:
                 print (' --------------------------------------------------> Iter:', it, '/', self.iterations)
+            if it % 10 == 0:
+                sys.stdout.flush()
             
             # Save previous state
             xhat_prev = xhat 
@@ -454,13 +463,16 @@ class AMP_Magni_Self():
 
             """  STOP CRITERION """
             stop, stop_criterion_value = self.stop_criterion_compute(xhat_prev, xhat)
-            if self.verbose:
-                print ('MSE:', stop_criterion_value)
+            
+            """ PLOTTING """
+            print ('MSE:', stop_criterion_value)
             mse.append(stop_criterion_value)
             iters.append(it + 1)
-            ax.scatter(iters, mse)
+            if stop_criterion_value < 10:
+                axx.set_ylim(0,10)
+            # axx.clear()
+            axx.plot(iters, mse)
             f.canvas.draw()
-
 
             # History reporting
             if stop:
