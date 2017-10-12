@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[2]:
+# In[55]:
 
 from PIL import Image # Part of the standard Python Library
 import scipy.ndimage as scimg
@@ -10,12 +10,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 get_ipython().magic('matplotlib inline')
+np.set_printoptions(precision=4)
 
 
 # # Links
 # [CDF Gist](https://gist.github.com/CoderSherlock/834e9eb918eeb0dfee5f4550077f57f8)
 
-# In[9]:
+# In[57]:
 
 '''
 2D CDF 9/7 Wavelet Forward and Inverse Transform (lifting implementation)
@@ -32,13 +33,13 @@ class cdf97():
         ''' Perform the CDF 9/7 transform on a 2D matrix signal m.
             nlevel is the desired number of times to recursively transform the
             signal. '''
-        w = len(img[0])
+        w = int(len(img[0]))
         h = len(img)
         for i in range(nlevels):
             m = self.fwt97(img, w, h) # cols
             img = self.fwt97(img, w, h) # rows
-            w /= 2
-            h /= 2
+            w = int(w/2)
+            h = int(h/2)
 
         return img
 
@@ -221,7 +222,7 @@ def gist_technique():
     im.save("test1_512_iwt.png") # Save the inverse transformation.
 
 def me_technique(nlevels = 1, nx = 512, ny = 512):    
-    img = scimg.imread("../data/raw_data/cat.1000.jpg", flatten=True)
+    img = scimg.imread("../../data/raw_data_cats/cat.1000.jpg", flatten=True)
     im_resize = imresize(img, (nx,ny)) #/255.0
     print ('0. Image:', im_resize.shape)
     f, axarr = plt.subplots(1,3)
@@ -234,9 +235,10 @@ def me_technique(nlevels = 1, nx = 512, ny = 512):
     print ('\n1. Performing Forward CDF transform....')
     im_resize = im_resize.tolist()
     im_transform = fwt97_obj.fwt97_2d(im_resize, nlevels=nlevels)
+    print ('Im Transform:', np.array(im_transform))
     print ('1. Performed Forward CDF transform')
     print ('1. im_transform : ', np.array(im_transform).shape)
-    axarr[1].imshow(im_transform, cmap = plt.cm.Paired)
+    axarr[1].imshow(im_transform, cmap = 'gray')
     
     # Perform an inverse CDF 9/7 transform on the image:
     print ('\n2. Performing Inverse CDF transform....')
@@ -247,13 +249,16 @@ def me_technique(nlevels = 1, nx = 512, ny = 512):
 if __name__ == "__main__":
     pass
     # gist_technique()
-    # me_technique()
+    # me_technique(nlevels=3)
 
+
+# In[90]:
 
 class cdf97_matlab():
     
     def filter9_7(self, verbose = 1):
         from scipy.signal import deconvolve
+        
         p0 = np.array([-5, 0, 49, 0, -245, 0, 1225, 2048, 1225, 0, -245, 0, 49, 0, -5]) / 2048; #half-band filter
         # r = np.roots(p0)
         b0 = np.array([1, 8, 28, 56, 70, 56, 28, 8, 1]);
@@ -297,42 +302,50 @@ class cdf97_matlab():
             
         return h0,h1,f0,f1
     
-    def idwt2d(self, x, f0, f1, maxlevel = 1):
+    def idwt2d(self, x, f0, f1, maxlevel = 1, show = 0, verbose = 0):
         # rx=idwt2d(x,f0,f1,maxlevel);
         # Inverse 2D Discrete Wavelet Transform
         m,n = x.shape
+        if verbose : print ('[Reconstrution] Original Image Size:', m, n)
+            
         rx = np.zeros((m,n))
         m = int(m / (2 ** maxlevel))
         n = int(n / (2 ** maxlevel))
-
+        if show:
+            f, axarr = plt.subplots(1, maxlevel, figsize=(16,16))
+        
+        x_recon = np.array(x)
         for i in range(maxlevel):            
-            xl = self.lphrec(x[0:m, 0:n].T      , x[0:m, n:2*n].T        , f0, f1)
-            xh = self.lphrec(x[m:2*m, 0:n].T, x[m:2*m, n:2*n].T, f0, f1)
-            x[0:2*m,0:2*n] = self.lphrec(xl.T,xh.T,f0,f1)
+            if verbose : 
+                print ('---------------------------> [Reconstrution] m,n:', m, n)
+            xl = self.lphrec(x_recon[0:m, 0:n].T   , x_recon[0:m, n:2*n].T  , f0, f1, verbose = verbose)
+            xh = self.lphrec(x_recon[m:2*m, 0:n].T , x_recon[m:2*m, n:2*n].T, f0, f1, verbose = verbose)
+            x_recon[0:2*m,0:2*n] = self.lphrec(xl.T,xh.T,f0,f1, verbose = verbose)
             m = int(m*2)
             n = int(n*2)
+            if show:
+                axarr[i].imshow(x_recon, cmap = 'gray')
     
-        rx = x
-        return rx
+        return x_recon
     
     def lphrec(self, xl, xh, f0, f1, mode = 1, verbose = 0):
         # x = lphrec(xl,xh,f0,f1,mode)
-        # Reconstruction of given scaling and wavelet components into the higher level 
-        # scaling coeffs. using a LP PR synthesis bank
-        #	Input:
-        #		xl  : input scaling coeffs.
-        #		      (vector [1,x_len/2] or list of vectors [m,x_len/2])
-        #		xh  : input wavelet coeffs.
-        #		      (vector [1,x_len/2] or list of vectors [m,x_len/2])
-        #		f0  : synthesis filter coeffs. for F0(z) (vector [1,h0_len])
-        #		f1  : synthesis filter coeffs. for F1(z) (vector [1,h1_len])
-        #		mode: Extension Mode:
-        #			0 - zero extension
-        #			1 - symmetric extension
-        #			2 - circular convolution
-        #	Output:
-        #		x   : scaling coeffs. at next higher level
-        #		      (vector [1,x_len] or list of vectors [m,x_len])
+            # Reconstruction of given scaling and wavelet components into the higher level 
+            # scaling coeffs. using a LP PR synthesis bank
+            #	Input:
+            #		xl  : input scaling coeffs.
+            #		      (vector [1,x_len/2] or list of vectors [m,x_len/2])
+            #		xh  : input wavelet coeffs.
+            #		      (vector [1,x_len/2] or list of vectors [m,x_len/2])
+            #		f0  : synthesis filter coeffs. for F0(z) (vector [1,h0_len])
+            #		f1  : synthesis filter coeffs. for F1(z) (vector [1,h1_len])
+            #		mode: Extension Mode:
+            #			0 - zero extension
+            #			1 - symmetric extension
+            #			2 - circular convolution
+            #	Output:
+            #		x   : scaling coeffs. at next higher level
+            #		      (vector [1,x_len] or list of vectors [m,x_len])
 
         m, xl_len = xl.shape;
         h0_len = len(f0);
@@ -349,13 +362,14 @@ class cdf97_matlab():
         xl2 = np.zeros((m,x_len))
         xh2 = np.zeros((m,x_len))
         
-        temp_cols_xl2 = np.arange(2-tb, x_len, 2)
-        temp_cols_xh2 = np.arange(1, x_len, 2)
+        temp_cols_xl2 = np.arange(2-tb-1, x_len, 2)
+        temp_cols_xh2 = np.arange(2-1, x_len, 2)
             
         if verbose:
+            print ('[Recon][lphrec] x_len, tb, ta :', x_len, tb, ta)
             print ('xl:', xl.shape, ' xl2:', xl2.shape)
             print ('xh:', xh.shape, ' xh2:', xh2.shape)
-            print ('2-tb:2:x_len', 2-tb, 2, x_len)
+            print ('2-tb-1:2:x_len', 2-tb-1, 2, x_len)
             print ('temp_cols_xl2:', temp_cols_xl2.shape)
             print ('temp_cols_xh2:', temp_cols_xh2.shape)
         
@@ -366,11 +380,11 @@ class cdf97_matlab():
 
         if mode == 1:
             if tb == 1:
-                xl2 = np.hstack((np.fliplr(xl2[:,2:ext+1+1]), xl2, np.fliplr(xl2[:,x_len-ext:x_len-1+1])));
-                xh2 = np.hstack((np.fliplr(xh2[:,2:ext+1+1]), xh2, np.fliplr(xh2[:,x_len-ext:x_len-1+1])));
+                xl2 = np.hstack((np.fliplr(xl2[:,1:ext+1+1]), xl2, np.fliplr(xl2[:,x_len-ext-1:x_len-1+1])));
+                xh2 = np.hstack((np.fliplr(xh2[:,1:ext+1+1]), xh2, np.fliplr(xh2[:,x_len-ext-1:x_len-1+1])));
             else:
-                xl2 = np.hstack((np.fliplr(xl2[:,2:ext+1])  , xl2 , np.zeros(m,1), np.fliplr(xl2[:,x_len-ext+1:x_len+1])))
-                xh2 = np.hstack((-np.fliplr(xh2[:,2:ext+1]) , xh2 , np.zeros(m,1), -np.fliplr(xh2[:,x_len-ext+1:x_len+1])))
+                xl2 = np.hstack((np.fliplr(xl2[:,1:ext+1])  , xl2 , np.zeros(m,1), np.fliplr(xl2[:,x_len-ext+1-1:x_len+1])))
+                xh2 = np.hstack((-np.fliplr(xh2[:,1:ext+1]) , xh2 , np.zeros(m,1), -np.fliplr(xh2[:,x_len-ext+1-1:x_len+1])))
         elif mode == 2:
             xl2 = [xl2[:,x_len-ext+1+ta:x_len], xl2, xl2[:,1:ext+ta]];
             xh2 = [xh2[:,x_len-ext+1+ta:x_len], xh2, xh2[:,1:ext+ta]];
@@ -392,25 +406,30 @@ class cdf97_matlab():
         
         return x
 
-    def dwt2d(self, x, h0, h1, maxlevel = 1):
-        # dx=dwt2d(x,h0,h1,level);
+    def dwt2d(self, x, h0, h1, maxlevel = 1, show=0):
         # Forward 2D Discrete Wavelet Transform
+        if show == 1:
+            f1, axarr1 = plt.subplots(1, maxlevel, figsize=(16,16))
         m, n = x.shape
+        x_coeffs = np.array(x)
+        
         for i in range(maxlevel):
-            [xl,xh]    = self.lphdec(x[0:m,0:n], h0, h1)
+            [xl,xh]    = self.lphdec(x_coeffs[0:m,0:n], h0, h1)
             # print ('\nxl : ', xl[0:5, 0:5])
             # print ('\nxh : ', xh[0:5, 0:5])
             [xll,xlh]  = self.lphdec(xl.T, h0, h1);
             [xhl,xhh]  = self.lphdec(xh.T, h0, h1);
             # print ('[xll,xlh] : ', [xll,xlh].shape, ' xll:', xll.shape, ' xlh:', xlh.shape)
-            x[0:m,0:n] = np.vstack( ( np.hstack((xll,xhl)), np.hstack((xlh,xhh))) ).T
+            x_coeffs[0:m,0:n] = np.vstack( ( np.hstack((xll,xhl)), np.hstack((xlh,xhh))) ).T
             # print (x.shape)
             # print (x[0:5, 0:5])
             m = int(m/2)
             n = int(n/2)
-        dx = x;
+            if show == 1:
+                axarr1[i].imshow(x_coeffs, cmap='gray')
         
-        return dx
+        
+        return x_coeffs
     
     def lphdec(self, x, h0, h1, mode=1, verbose = 0):
         # [xl,xh] = lphdec(x,h0,h1,mode)
@@ -488,32 +507,64 @@ class cdf97_matlab():
         
         return xl, xh
 
+def cdf97_matlab_sample(url, nx, ny, resized=False, compress=False):
+    import numpy as np
+    from scipy.ndimage import imread
+    from scipy.misc import imresize
+    from skimage.measure import compare_psnr
+    import matplotlib.pyplot as plt
+    
+    get_ipython().magic('matplotlib inline')
+    np.set_printoptions(precision=4)
+    
+    if url == '':
+        url = '../../data/lena512.bmp'
+        url = '../../data/raw_data_cats/cat.12.jpg'
+    
+    x = imread(url, flatten = True)
+    x_resize = imresize(x, (nx,ny)).astype(np.float16)
+    
+    m, n = x.shape
+    f, axarr = plt.subplots(1,4, figsize=(10,10))
+    print ('Original Image:', x.shape)
+    print ('Reshaped Image:', x_resize.shape)
+    axarr[0].imshow(x, cmap = 'gray')
+    axarr[1].imshow(x_resize, cmap = 'gray')
+    if resized:
+        x = np.array(x_resize)
+    
+    cdf97_obj = cdf97_matlab()
+    
+    """ STEP 1 """
+    h0,h1,f0,f1 = cdf97_obj.filter9_7(verbose = 0)
+    # print ('h0,h1,f0,f1', h0.shape, h1.shape, f0.shape, f1.shape)
+    
+    """ STEP 2 """
+    L = int(np.floor(np.log2(m)) - 3)
+    L = 3
+    x_coeffs = cdf97_obj.dwt2d(x, h0, h1, maxlevel = L, show = 1)
+    axarr[2].imshow(x_coeffs, cmap = 'gray')
+    if compress:
+        compres_thresh = 10
+        print ('Total pixels:', x_coeffs.shape[0] * x_coeffs.shape[1], ' Non Zero Pixels:', np.count_nonzero(x_coeffs))
+        x_coeffs[(x_coeffs < compres_thresh) & (x_coeffs > -1*compres_thresh)] = 0
+        print ('Total pixels:', x_coeffs.shape[0] * x_coeffs.shape[1], ' Non Zero Pixels:', np.count_nonzero(x_coeffs))
+    
+    """ STEP 3 """
+    x_recon = cdf97_obj.idwt2d(x_coeffs, f0, f1, maxlevel = L, show = 1, verbose = 0)
+    axarr[3].imshow(x_recon, cmap='gray')
+    
+    pSNR = compare_psnr(x.astype(np.float32), x_recon.astype(np.float32), dynamic_range=255)
+    print ('pSNR (of transform basis):', pSNR)
+
 if __name__ == "__main__":
     pass
-    # import numpy as np
-    # from scipy.ndimage import imread
-    # from scipy.signal import deconvolve
-    # import matplotlib.pyplot as plt
-    
-    # %matplotlib inline
-    # np.set_printoptions(precision=4)
-    
-    # f, axarr = plt.subplots(1,3, figsize=(10,10))
-    # x = imread('../../data/lena512.bmp', flatten = True)
-    # m, n = x.shape
-    # axarr[0].imshow(x, cmap = 'gray')
-    
-    # cdf97_obj = cdf97_matlab()
-                      
-    # h0,h1,f0,f1 = cdf97_obj.filter9_7(verbose = 0)
-    # # L = int(np.floor(np.log2(m)) - 3)
-    # L = 1
-    # x_coeffs = cdf97_obj.dwt2d(x, h0, h1, L)
-    # axarr[1].imshow(x_coeffs, cmap = plt.cm.Paired)
-    
-    # x_recon = cdf97_obj.idwt2d(x, f0, f1, L)
-    # axarr[2].imshow(x_recon, cmap='gray')
+#     nx = ny = 512
+#     cdf97_matlab_sample('../../noniterative/data/original/SRCNN/Test/Set14/baboon.bmp'
+#                         , nx, ny, resized = True, compress = False) 
 
+
+# In[ ]:
 
 
 

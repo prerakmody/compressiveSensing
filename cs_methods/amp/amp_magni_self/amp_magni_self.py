@@ -429,20 +429,15 @@ class AMP_Magni_Self():
 
 
         # Plotting Purposes
-        f, axx = plt.subplots(1, 1, squeeze=True)
-        axx.set_xlabel('Iteration')
-        axx.set_ylabel('MSE')
-        axx.set_xlim(0, self.iterations)
-        axx.set_ylim(0,1000)
+        f, axx = plt.subplots(1, 2, figsize = (6,6), squeeze=True)
+        axx[0].set_xlabel('Iteration')
+        axx[0].set_ylabel('MSE')
+        axx[1].set_xlabel('Iteration')
+        axx[1].set_ylabel('MSE')
         mse = []
         iters = []
 
         for it in range(self.iterations):
-            if it % 50 == 0:
-                print (' --------------------------------------------------> Iter:', it, '/', self.iterations)
-            if it % 10 == 0:
-                sys.stdout.flush()
-            
             # Save previous state
             xhat_prev = xhat 
 
@@ -465,13 +460,16 @@ class AMP_Magni_Self():
             stop, stop_criterion_value = self.stop_criterion_compute(xhat_prev, xhat)
             
             """ PLOTTING """
-            print ('MSE:', stop_criterion_value)
+            sys.stdout.write('\rMSE:' + str(stop_criterion_value))
             mse.append(stop_criterion_value)
             iters.append(it + 1)
             if stop_criterion_value < 10:
-                axx.set_ylim(0,10)
-            # axx.clear()
-            axx.plot(iters, mse)
+                axx[1].clear()
+                axx[1].set_ylim(0,10)
+                axx[1].plot(iters, mse)
+            else:
+                axx[0].clear()
+                axx[0].plot(iters, mse)
             f.canvas.draw()
 
             # History reporting
