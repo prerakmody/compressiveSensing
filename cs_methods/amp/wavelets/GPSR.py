@@ -286,20 +286,11 @@ def GPSR_raw(
     #--------------------------------------------------------------
     if np.isscalar(init):
         if init == 0:
-            #
-            # initialize at zero, using AT to find the size of x
-            #
-            x = AT(np.zeros(y.shape))
+            x = AT(np.zeros(y.shape)) # initialize at zero, using AT to find the size of x
         elif init == 1:
-            #
-            # initialize randomly, using AT to find the size of x
-            #
-            x = np.random.randn(AT(np.zeros(y.shape)).shape)
+            x = np.random.randn(AT(np.zeros(y.shape)).shape) # initialize randomly, using AT to find the size of x
         elif init == 2:
-            #
-            # initialize x0 = A'*y
-            #
-            x = Aty
+            x = Aty # initialize x0 = A'*y
         else:
             raise Exception("Unknown 'Initialization' option")
     else:
@@ -308,15 +299,11 @@ def GPSR_raw(
         else:
             raise Exception("Size of initial x is not compatible with A")
 
-    #
     # now check if tau is an array; if it is, it has to have the same size as x
-    #
     if not np.isscalar(tau) and tau.shape != x.shape:
         raise Exception('Parameter tau has wrong dimensions; it should be scalar or size(x)')
 
-    #
     # if the true x was given, check its size
-    #
     compute_mse = False
     plot_ISNR = False
     if true_x.any() != None:
@@ -325,10 +312,7 @@ def GPSR_raw(
         compute_mse = True
         plot_ISNR = True
     
-    #
-    # if tau is large enough, in the case of phi = l1, thus psi = soft,
-    # the optimal solution is the zero vector
-    #
+    # if tau is large enough, in the case of phi = l1, thus psi = soft,the optimal solution is the zero vector
     if phi_l1:
         max_tau = np.max(np.abs(Aty))
         
@@ -342,15 +326,11 @@ def GPSR_raw(
             
             return x, x_debias, objective, times, debias_start, mses, max_svd
 
-    #
     # define the indicator vector or matrix of nonzeros in x
-    #
     nz_x = x != 0
     num_nz_x = np.sum(nz_x)
 
-    #
     # Compute and store initial value of the objective function
-    #
     resid = y - A(x)
     prev_f = 0.5*np.sum(resid * resid) + tau*phi_function(x)
 
@@ -377,12 +357,12 @@ def GPSR_raw(
     #
     # initialize
     #
-    xm2 = x
-    xm1 = x
+    xm2 = x # TwIST
+    xm1 = x # IST
 
-    #--------------------------------------------------------------
+    #-------------------------------------------------------------------------------------------------------------------------------
     # TwIST iterations
-    #--------------------------------------------------------------
+    #-------------------------------------------------------------------------------------------------------------------------------
     cont_outer = True
     while cont_outer:
         #
@@ -393,7 +373,7 @@ def GPSR_raw(
             #
             # IST estimate
             #
-            x = psi_function(xm1 + grad/max_svd, tau/max_svd)
+            x = psi_function(xm1 + grad/max_svd, tau/max_svd)      #xm1 = x, max_svd = 1, , psi_function = softThreshold(x, threshold); tau = regularization operator
             if (IST_iters >= 2) or (TwIST_iters != 0):
                 #
                 # set to zero the past when the present is zero
@@ -406,23 +386,19 @@ def GPSR_raw(
                 #
                 # two-step iteration
                 #
-                xm2 = (alpha-beta)*xm1 + (1-alpha)*xm2 + beta*x
-
+                xm2 = (alpha-beta)*xm1 + (1-alpha)*xm2 + beta*x  #alpha, beta = fixed constants  {constant1}*xm1 + {constant2}*xm2 + {constant2}*x
+ 
                 #
                 # compute residual
                 #
                 resid = y - A(xm2)
-                f = 0.5*np.sum(resid *resid) + tau*phi_function(xm2)
+                f = 0.5*np.sum(resid *resid) + tau*phi_function(xm2) #f (or objective) = 1/2 * sum(error^2) + regul_operator * phi(xm2) ; phi = regularization function (l1 norm for this code)
                 
-                if (f > prev_f) and enforce_monotone:
-                    #
+                if (f > prev_f) and enforce_monotone:  #default is False. So ignore
                     # do a IST iteration if monotonocity fails
-                    #
                     TwIST_iters = 0
                 else:
-                    #
                     # TwIST iterations
-                    #
                     TwIST_iters += 1
                     IST_iters = 0
                     x = xm2
