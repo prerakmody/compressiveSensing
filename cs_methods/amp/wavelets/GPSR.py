@@ -138,7 +138,7 @@ def GPSR_raw(
               
                 arg min_x = 0.5*|| y - A^T x ||_2^2 
     
-            where ::math:`A^T` is the  submatrix of A obatained by
+            where ::math:`A^T` is the  submatrix of A obtained by
             deleting the columns of A corresponding to components
             of x set to zero by the GPSR algorithm
                     

@@ -11,32 +11,38 @@ References
 """
 
 import sys
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 class AMP_Magni_Self():
 
-    def __init__(self, m, N, y, A, tolerance = 1e-6, iterations = 300, threshold_level_update_method = 'residual', tau_hat_sq = 1.0, verbose = 0):
+    def __init__(self, m, N, y, A, A_T, tolerance = 1e-6, iterations = 300, threshold_level_update_method = 'residual', tau_hat_sq = 1.0, verbose = 0, show = 0):
         self.m = m
         self.N = N
         self.y = y
         self.A = A
+        if A_T != [] and callable(A_T):
+            self.AH = A_T
+        else: 
+            self.AH = A.conj().T
 
+        self.delta = float(self.m) / self.N
         self.tolerance = tolerance
         self.iterations = iterations
         self.threshold_level_update_method = threshold_level_update_method
         self.update_method = threshold_level_update_method
-        self.theta = self.theta_mm(float(self.m) / self.N)
+        self.theta = self.theta_mm(self.delta)
         self.tau_hat_sq = tau_hat_sq
 
-        self.AH = A.conj().T
-        self.delta = A.shape[0] / A.shape[1]
+        
 
         print('Iterations:', self.iterations)
         print ('MSE Tolerance:', self.tolerance)
 
         self.verbose = verbose
+        self.show = show
 
 
     def theta_mm(self, delta):
@@ -422,18 +428,30 @@ class AMP_Magni_Self():
         1.1) b(t) = 1/M * sum(del(thresh))                # del(thresh) = derivate of the threshold function
         """
 
+        SLEEP = 0
+        if not (callable(self.A) and callable(self.AH)):
+            print ('A is a matrix')
+            A  = lambda xx  : np.array(self.A.dot(xx))
+            AH = lambda xx  : np.array(self.AH.dot(xx))
+        else:
+            print ('A is a function')
+            A  = lambda xx  : self.A(xx)
+            AH = lambda xx  : self.AH(xx)
+
+
         # AMP iterations
-        xhat = np.zeros((self.A.shape[1], 1)) #, dtype = np.float32)
-        res = self.y - self.A.dot(xhat)
-        AH_dot_res = self.AH.dot(res)
+        xhat = np.zeros((self.N, 1)) #, dtype = np.float32)
+        res = self.y - A(xhat)
+        AH_dot_res = AH(res)
 
 
         # Plotting Purposes
-        f, axx = plt.subplots(1, 2, figsize = (6,6), squeeze=True)
-        axx[0].set_xlabel('Iteration')
-        axx[0].set_ylabel('MSE')
-        axx[1].set_xlabel('Iteration')
-        axx[1].set_ylabel('MSE')
+        if self.show:
+            f, axx = plt.subplots(1, 3, figsize = (6,6), squeeze=True)
+            axx[0].set_xlabel('Iteration')
+            axx[0].set_ylabel('MSE')
+            axx[1].set_xlabel('Iteration')
+            axx[1].set_ylabel('MSE')
         mse = []
         iters = []
 
@@ -445,13 +463,8 @@ class AMP_Magni_Self():
             xhat = self.compute_threshold(xhat, AH_dot_res)
 
             """ EQN 1 """
-            if callable(self.A):
-                pass
-            else:
-                A_dot_xhat = self.A.dot(xhat)
-            
-            res = (self.y - A_dot_xhat) + 1 / self.delta * np.mean(self.compute_deriv_threshold(xhat_prev, AH_dot_res)) * res
-            AH_dot_res = self.AH.dot(res) #this should be made into a function call to save on space for i.i.d Gaussian A
+            res = (self.y - A(xhat)) + 1 / self.delta * np.mean(self.compute_deriv_threshold(xhat_prev, AH_dot_res)) * res
+            AH_dot_res = AH(res) #this should be made into a function call to save on space for i.i.d Gaussian A
 
             """ FOR EQN 2 """
             self.update_threshold_level(res)
@@ -460,17 +473,26 @@ class AMP_Magni_Self():
             stop, stop_criterion_value = self.stop_criterion_compute(xhat_prev, xhat)
             
             """ PLOTTING """
-            sys.stdout.write('\rMSE:' + str(stop_criterion_value))
-            mse.append(stop_criterion_value)
-            iters.append(it + 1)
-            if stop_criterion_value < 10:
-                axx[1].clear()
-                axx[1].set_ylim(0,10)
-                axx[1].plot(iters, mse)
+            if self.show:
+                sys.stdout.write('\r Iteration:' + str(it) + '  MSE:' + str(stop_criterion_value))
+                mse.append(stop_criterion_value)
+                iters.append(it + 1)
+                if stop_criterion_value < 10:
+                    axx[1].clear()
+                    axx[1].set_ylim(0,10)
+                    axx[1].plot(iters, mse)
+                else:
+                    axx[0].clear()
+                    axx[0].plot(iters, mse)
+                
+                axx[2].clear()
+                axx[2].imshow(xhat.reshape((128,128)), cmap = 'gray')
+
+                f.canvas.draw()
+                # time.sleep(0.0001)
             else:
-                axx[0].clear()
-                axx[0].plot(iters, mse)
-            f.canvas.draw()
+                sys.stdout.write('\r Iteration:' + str(it) + '  MSE:' + str(stop_criterion_value))
+                # print ('Iteration: ',it,'  MSE: ', str(stop_criterion_value))
 
             # History reporting
             if stop:
