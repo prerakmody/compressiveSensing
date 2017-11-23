@@ -10,25 +10,36 @@
                 * `dpkg --get-selections | grep nvidia`
                     * The above three values should match
                     * You should not have multiple Nvidia drivers installed
-                * 
-            * A process list for your GPU : `nvidia-smi`
+            * A process list for your GPU
+                * `nvidia-smi` OR `watch -n 1 nvidia-smi`
+                * You may have to add the following to the command line : `export LD_PRELOAD=/usr/lib/nvidia-384/libnvidia-ml.so`
             * Check VGA and 3D drivers : `lspci -k | grep -EA2 'VGA|3D'`
-                * To turn VGA to Intel GPU
+                * To turn VGA to Intel GPU 
                     * `sudo nvidia-settings`
                     * Go to PRIME Profiles
                     * Select Intel GPU
+                        * This will ensure that you laptop display is not hogging GPU resources.
+                        * Change this anytime you wish to play games
+        * If drivers are not available 
+            * Method 1 (do not follow as these are Ubuntu's open source drivers) 
+                * ```
+                    sudo add-apt-repository ppa:graphics-drivers/ppa
+                    ls /etc/apt/sources.list.d #this shows the ppa being added
+                    sudo apt-get update
+                    sudo ubuntu-drivers autoinstall (this also helps if the login screen turns into a loop)
+                    sudo reboot
+                    nvidia-smi
+                    ```
+            * Method 2
+                * `sudo apt-get remove --purge nvidia-*`
+                * Check the `Additional Drivers` app in Ubuntu and make sure there are no proprietary drivers. It will be using the `Noveau` driver.
+                * Follow instructions from this [page](https://gist.github.com/wangruohui/df039f0dc434d6486f5d4d098aa52d07#creat-blacklist-for-nouveau-driver)
+                * If you get stuck in a login loop on your Desktop manager 
+                    * Ctrl + Alt + F1
+                    * sudo ubuntu-drivers list
+                    * sudo ubuntu-drivers autoinstall
+                    * sudo service lightdm restart
 
-            * Experimental reset command : 
-                * `sudo su`
-                * `LD_PRELOAD=/usr/lib/nvidia-367/libnvidia-ml.so`
-                * `sudo nvidia-smi --gpu-reset -i 0`
-        * If not available 
-            * sudo add-apt-repository ppa:graphics-drivers/ppa
-            * sudo apt-get update
-            * sudo ubuntu-drivers autoinstall (this also helps if the login screen turns into a loop)
-            * sudo reboot
-            * nvidia-smi
-                * You may have to add the following to the command line : `export LD_PRELOAD=/usr/lib/nvidia-375/libnvidia-ml.so`
         * If the NVIDIA driver is not responding after a PC hibernate/sleep
             * ```
                 sudo rmmod nvidia_uvm
@@ -40,18 +51,20 @@
                 sudo modprobe nvidia_drm
                 sudo modprobe nvidia_uvm
             ```
+            * To reset the GPU
+                * `nvidia-smi -r`
 1. **Install Cuda**
     * ***
     * Linux
         * Refer to this [documentation](http://docs.nvidia.com/cuda/cuda-installation-guide-linux/#axzz4VZnqTJ2A)
             * use the debian package for installation
         * Post Installation
-            * Include these in ~/.profile
+            * Include these in ~/.bashrc
             * ```
                export CUDA_HOME=/usr/local/cuda-8.0
                export CUDA_ROOT=/usr/local/cuda-8.0
                export PATH=/usr/local/cuda-8.0/bin${PATH:+:${PATH}}
-               export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64:/usr/lib/nvidia-375
+               export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64:/usr/lib/nvidia-384
                export LD_PRELOAD=/usr/lib/nvidia-375/libnvidia-ml.so
             ```
             * To check if driver is detected by CUDA
